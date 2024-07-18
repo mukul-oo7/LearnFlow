@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node app.js",
+    "dev" : "npx nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +15,8 @@
     "connect-mongo": "^3.2.0",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
+    "express-session": "^1.17.1",
+    "mogoose": "^0.0.1-security",
     "mongoose": "^7.2.0",
     "passport": "^0.6.0",
     "passport-google-oauth": "^2.0.0"
