@@ -1,6 +1,8 @@
 const { Router } = require("express");
 const mongoose = require("mongoose");
+
 const User = mongoose.model("users");
+const Post = mongoose.model('posts');
 
 const { ensureAuth, ensureGuest } = require("../middleware/auth");
 const { ensureSingup, ensureNewUser } = require("../middleware/user");
@@ -41,8 +43,18 @@ router.patch(
   }
 );
 
-router.get("/dashboard", ensureAuth, ensureSingup, (req, res) => {
-  res.send("<h1>Welcome to LearnFlow</h1>");
+router.get("/dashboard", ensureAuth, ensureSingup, async (req, res) => {
+  try {
+    const posts = await Post.find({});
+
+    res.locals.user = req.user;
+    res.locals.posts = posts;
+
+    res.render('dashboard');
+  } catch (error) {
+    console.log(error);
+    res.redirect('/internal-server-error');
+  }
 });
 
 module.exports = router;

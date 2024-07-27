@@ -17,7 +17,7 @@ const ensureNewUser = (req, res, next) => {
 const ensureCreator = (req, res, next) => {
   const user = req.user;
 
-  if(user===0) return next();
+  if(user.role === 0) return next();
   res.redirect("/dashboard");
 }
 

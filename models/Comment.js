@@ -1,29 +1,29 @@
 const mongoose = require('mongoose');
 
-const PostSchema = new mongoose.Schema({
-    title: {
+const CommentSchema = new mongoose.Schema({
+    postId: {
         type: String,
         required: true,
     },
-    subTitle: {
+    author: {
         type: String,
         required: true,
     },
-    description: {
+    authorImage: {
         type: String,
         default: "",
     },
-    thumbnail: {
-        type: String,
-        default: "/img/theme/light/code-2.jpg",
-    },
-    video: {
-        type: String,
-        default: "",
-    },
-    userId: {
+    commentText: {
         type: String,
         required: true,
+    },
+    parentId: {
+        type: String,
+        default: null,
+    },
+    depth: {
+        type: Number,
+        default: 1,
     },
     createdAt: {
         type: Number,
@@ -31,4 +31,4 @@ const PostSchema = new mongoose.Schema({
     },
 });
 
-mongoose.model("posts", PostSchema);
+mongoose.model("comments", CommentSchema);
