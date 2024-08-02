@@ -399,32 +399,39 @@
 <script>
   const uploadFile = async (file) => {
     // console.log("1", file);
+    try {
+      const urlRes = await fetch(`/upload/presignedUrl?fileName=${file.name}&fileType=${file.type}`,
+        {
+          method: "GET",
+        }
+      );
+      
+      const urlData = await urlRes.json();
+  
+      const { url, uniqueFileName } = urlData;
+  
+      const uploadResponse = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
 
-    const urlRes = await fetch(`/upload/presignedUrl?fileName=${file.name}&fileType=${file.type}`,
-      {
-        method: "GET",
-      }
-    );
-    
-    // console.log(urlRes);
-    console.log("url response" , urlRes);
-    const urlData = await urlRes.json();
-    console.log("url data", urlData);
+      console.log(uniqueFileName);
 
-    const { url, fileName } = urlData;
-
-    console.log(url, fileName);
-
-    const uploadResponse = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Content-Type": file.type,
-      },
-      body: file,
-    });
-
-    console.log(uploadResponse);
+      return {
+        uploadResponse,
+        uniqueFileName,
+      };
+      
+    } catch (error) {
+      console.log(error);
+      $("#loadingModal").modal("hide");
+      $("#errorModal").modal("show");
+    }
   }
+    
 </script>
 
 <script>
@@ -440,94 +447,65 @@
 
     try {
       const videoThumbnail = document.querySelector('#video-thumbnail');
+      const video = document.querySelector('#video');
+
+      let thumbnailUploadResponse, thumbnailKeyName;
       
       if(videoThumbnail.files.length > 0){
-      console.log(videoThumbnail.files[0]);
-      uploadFile(videoThumbnail.files[0]);
-    }
+        const {uploadResponse, uniqueFileName} =  await uploadFile(videoThumbnail.files[0]);
+        thumbnailKeyName = uniqueFileName;
+        thumbnailUploadResponse = uploadResponse;
+        console.log("Thumbnail", uploadResponse, uniqueFileName); 
+      }
+      
+      let videoUploadResponse, videoKeyName;
 
-    //   const videoThumbnail = document.querySelector("#video-thumbnail");
+      if(video.files.length > 0){
+        const {uploadResponse, uniqueFileName} =  await uploadFile(video.files[0]);
+        videoKeyName = uniqueFileName;
+        videoUploadResponse = uploadResponse;
+        console.log("video", uploadResponse, uniqueFileName); 
+      }
 
-    //   let thumbnailUploadResponse, thumbnailKeyName;
+      const cloudFrontUrl = "https://d39rad7t6sfca1.cloudfront.net";
 
-    //   if (videoThumbnail.files.length > 0) {
-    //     const { uploadResponse, fileName } = await uploadFile(
-    //       videoThumbnail.files[0]
-    //     );
-    //     thumbnailUploadResponse = uploadResponse;
-    //     thumbnailKeyName = fileName;
-    //     console.log("THUMBNAIL", uploadResponse, fileName);
-    //   }
+      const newPost = {
+        title: form.title.value,
+        subTitle: form.subTitle.value,
+        description: editor1.getHTMLCode(),
+      }
 
-    //   let videoUploadResponse, videoKeyName;
+      if(videoUploadResponse.ok){
+        newPost.video = `${cloudFrontUrl}/${videoKeyName}`;
+      }
 
-    //   const video = document.querySelector("#video");
-    //   if (video.files.length > 0) {
-    //     const { uploadResponse, fileName } = await uploadFile(video.files[0]);
+      if(thumbnailUploadResponse.ok){
+        newPost.thumbnail = `${cloudFrontUrl}/${thumbnailKeyName}`;
+      }
 
-    //     videoUploadResponse = uploadResponse;
-    //     videoKeyName = fileName;
-    //     console.log("VIDEO", uploadResponse, fileName);
-    //   }
-
-    //   const newPost = {
-    //     title: form.title.value,
-    //     subTitle: form.subTitle.value,
-    //     description: editor1.getHTMLCode(),
-    //   };
-
-    //   if (videoUploadResponse.ok) {
-    //     newPost.video = `https://dt7hj5bw4w6bv.cloudfront.net/${videoKeyName}`;
-    //   }
-
-    //   if (thumbnailUploadResponse.ok) {
-    //     newPost.thumbnail = `https://dt7hj5bw4w6bv.cloudfront.net/${thumbnailKeyName}`;
-    //   }
-
-    //   const response = await fetch("/post/create", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(newPost),
-    //   });
-    //   const data = await response.json();
-    //   if (data.id) {
-    //     $("#loadingModal").modal("hide");
-    //     $("#successModal").modal("show");
-    //   } else {
-    //     $("#loadingModal").modal("hide");
-    //     $("#errorModal").modal("show");
-    //   }
 
         // uploading post details in backend  
 
-        // const title = form.title.value;
-        // const subTitle = form.subTitle.value;
-        // const description = editor1.getHTMLCode();
+      const response = await fetch("/post/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json"},
+          body: JSON.stringify(newPost),
+      });
 
-        // const response = await fetch("/post/create", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json"},
-        //     body: JSON.stringify({
-        //         title,
-        //         subTitle,
-        //         description,
-        //     }),
-        // });
-
-        // const data = await response.json();
-        
-        // if(data.id){
-        //     $("#loadingModal").modal("hide");
-        //     $("#successModal").modal("show");
-        // } else{
-        //     $("#loadingModal").modal("hide");
-        //     $("#errorModal").modal("show");
-        // }
+      const data = await response.json();
+      
+      if(data.id){
+          $("#loadingModal").modal("hide");
+          $("#successModal").modal("show");
+      } else{
+          $("#loadingModal").modal("hide");
+          $("#errorModal").modal("show");
+      }
 
     } catch (error) {
-      // console.log(error);
-      // $("#loadingModal").modal("hide");
-      // $("#errorModal").modal("show");
+      console.log(error);
+      $("#loadingModal").modal("hide");
+      $("#errorModal").modal("show");
     }
   });
 </script>

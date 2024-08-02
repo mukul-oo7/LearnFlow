@@ -1,6 +1,8 @@
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY } = require('../config/keys');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+
+
 const { v4: uuid } = require("uuid");
 const { Router } = require("express");
 const { ensureAuth } = require('../middleware/auth')
@@ -28,7 +30,7 @@ const getPresignedUrl = async (fileName, fileType) => {
     const url = await getSignedUrl(bucket, command, { expiresIn: 3600 });
     return {
         url,
-        fileName,
+        uniqueFileName,
     };
 }
 
@@ -46,6 +48,7 @@ router.get("/presignedUrl", ensureAuth, async (req, res) => {
         }
 
         const urlResponse = await getPresignedUrl(fileName, fileType);
+        console.log(urlResponse);
 
         res.status(200).send(urlResponse);
 

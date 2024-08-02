@@ -20,7 +20,6 @@ router.get("/create", ensureAuth, ensureSingup, ensureCreator, (req, res) => {
 
 router.post("/create", ensureAuth, ensureSingup, ensureCreator, async (req, res) => {
     try{
-
         const post = await Post.create({
             ...req.body,
             userId: req.user._id,
